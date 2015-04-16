@@ -1,0 +1,104 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gradient-input {
+  position: absolute;
+  top: 0;
+  left: 5vw;
+  width: 90vw;
+  font-size: 1em;
+  padding: .8em 0;
+  color: #777;
+  background: transparent;
+  border-color: #eee;
+  border-style: solid;
+  border-width: 0 0 1px 0;
+  text-align: center;
+  transition: .2s all;
+}
+
+.gradient-input:hover,
+.gradient-input:focus {
+  background: #eee;
+  color: rgb(222, 7, 159);
+}
+
+.test-element {
+  width: 50vw;
+  height: 50vh;
+  background-image: linear-gradient(75deg, #3800fd -5%, #ff0092 40%, #ff6fb1 65%, #ff4740 90%);
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  color: #555;
+}
+
+.gradient-box {
+  stroke: currentColor;
+  fill: none;
+  shape-rendering: crispEdges;
+}
+
+.gradient-line {
+  stroke-width: 2;
+  stroke: currentColor;
+}
+
+.angle-arc {
+  stroke-width: 1;
+  stroke: currentColor;
+  fill: transparent;
+}
+
+.support-line {
+  stroke-width: 1;
+  stroke: currentColor;
+  stroke-dasharray: 3 2;
+}
+
+.extend-line {
+  marker-start: url(#extending-line-start);
+  marker-end: url(#extending-line-end);
+}
+
+.gradient-line-point,
+.color-stop {
+  fill: currentColor;
+}
+
+.color-stop-label {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid white;
+  box-sizing: border-box;
+  box-shadow: 0 1px 5px rgba(0,0,0,.3);
+  pointer-events: auto;
+  transform-origin: 10px -10px;
+}
+
+.color-stop-label::before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-color: transparent transparent white transparent;
+  border-width: 0px 6px 6px;
+  top: -6px;
+  left: 2px;
+}
