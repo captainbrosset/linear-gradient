@@ -84,9 +84,9 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 2px solid white;
+  border: 2px solid #FFF;
   box-sizing: border-box;
-  box-shadow: 0 1px 5px rgba(0,0,0,.3);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
   pointer-events: auto;
   transform-origin: 10px -10px;
 }
@@ -97,8 +97,8 @@ body {
   width: 0;
   height: 0;
   border-style: solid;
-  border-color: transparent transparent white transparent;
-  border-width: 0px 6px 6px;
+  border-color: transparent transparent #FFF transparent;
+  border-width: 0 6px 6px;
   top: -6px;
   left: 2px;
 }
