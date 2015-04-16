@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="application/javascript;version=1.8" src="script.js"></script>
+<script type="application/javascript;version=1.8">
+
+// Each test case is an object with the following properties:
+// - input: An array of color stop positions. Each position must either be
+//   undefined, or a number, in which case it will be assumed to be in %
+// - output: An array of color stop positions we expect the browser to have
+//   understood from the input.
+const TEST_DATA = [{
+  input: [undefined, undefined],
+  output: [0, 100]
+}, {
+  input: [undefined, undefined, undefined],
+  output: [0, 50, 100]
+}, {
+  input: [undefined, undefined, undefined, undefined, undefined],
+  output: [0, 25, 50, 75, 100]
+}, {
+  input: [-10, 100],
+  output: [-10, 100]
+}, {
+  input: [-10, -20],
+  output: [-10, -10]
+}, {
+  input: [110, 100],
+  output: [110, 110]
+}, {
+  input: [50, undefined, 100],
+  output: [50, 75, 100]
+}, {
+  input: [100, 50, 75, undefined],
+  output: [100, 100, 100, 100]
+}, {
+  input: [undefined, undefined, undefined, -20],
+  output: [-20, -20, -20, -20]
+}, {
+  input: [10, 20, 30, -20],
+  output: [10, 20, 30, 30]
+}, {
+  input: [10, undefined, 20],
+  output: [10, 15, 20]
+}, {
+  input: [75, 20, 30],
+  output: [75, 75, 75]
+}, {
+  input: [75, 20, undefined],
+  output: [75, 75, 100]
+}, {
+  input: [60, 20, undefined, undefined],
+  output: [60, 60, 80, 100]
+}];
+
+for (let {input, output} of TEST_DATA) {
+  let inputStr = "linear-gradient(rgb(0,0,0)";
+  for (let i = 0; i < input.length; i ++) {
+    let stop = input[i];
+    if (stop) {
+      inputStr += " " + stop + "%";
+    }
+    if (i < input.length - 1) {
+      inputStr += ", rgb(0,0,0)";
+    }
+  }
+  inputStr += ")";
+
+  console.log("Now testing " + inputStr);
+
+  let {stops} = parseGradient({value: inputStr}, {
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 200
+  });
+
+  if (stops.length !== output.length) {
+    console.error("Unexpected number of stops. Expected " + output.length + ". Got " + stops.length);
+  }
+
+  for (let i = 0; i < stops.length; i ++) {
+    let stop = stops[i];
+    let expected = output[i];
+    if (stop.position !== expected) {
+      console.error("Unexpected stop " + i + " position. Expected " + expected + ". Got " + stop.position);
+    }
+  }
+}
+</script>
