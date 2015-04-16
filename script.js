@@ -1,10 +1,3 @@
-// TODO
-// - the gradient-box depends on background-size and background position
-// - support multiple gradients!
-// - other angle units don't work (rad, grad, turn)
-// - bug with (red 30%, orange, yellow, black 10%) -> all stops should be at 30%
-// - the computed-style isn't formatted the same on all browsers, so changing the value in the input only works in firefox for now.
-
 /*
       B
     +-----+
