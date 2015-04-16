@@ -1,9 +1,11 @@
+/* Make the document 100% of the viewport */
 html, body {
   height: 100%;
   margin: 0;
   overflow: hidden;
 }
 
+/* Items inside body will be centered vertically and horizontally */
 body {
   display: flex;
   justify-content: center;
@@ -35,9 +37,15 @@ body {
 .test-element {
   width: 50vw;
   height: 50vh;
-  background-image: linear-gradient(75deg, #3800fd -5%, #ff0092 40%, #ff6fb1 65%, #ff4740 90%);
+  /* The gradient shown by default on startup */
+  background-image: linear-gradient(75deg, #3800fd -5%,
+                                           #ff0092 40%,
+                                           #ff6fb1 65%,
+                                           #ff4740 90%);
 }
 
+/* The gradient overlay is the tool itself, it is absolutely positioned
+   on top of the test-element */
 .gradient-overlay {
   position: absolute;
   top: 0;
@@ -84,7 +92,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 2px solid #FFF;
+  border: 2px solid #fff;
   box-sizing: border-box;
   box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
   pointer-events: auto;
@@ -97,7 +105,7 @@ body {
   width: 0;
   height: 0;
   border-style: solid;
-  border-color: transparent transparent #FFF transparent;
+  border-color: transparent transparent #fff transparent;
   border-width: 0 6px 6px;
   top: -6px;
   left: 2px;
