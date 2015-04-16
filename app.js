@@ -232,7 +232,11 @@ function resolvePosition(positionString, gradientLine) {
   let isPx = positionString.endsWith("px");
   let value = parseFloat(positionString);
 
-  return isPx ? value * 100 / gradientLine.length : value;
+  if (isNaN(value)) {
+    return undefined;
+  } else {
+    return isPx ? value * 100 / gradientLine.length : value;
+  }
 }
 
 function parseGradient(parsedBackgroundImage, gradientBoxBounds) {
@@ -289,88 +293,21 @@ function parseGradient(parsedBackgroundImage, gradientBoxBounds) {
   // Get the gradient line data.
   let gradientLine = getGradientLine(angle, gradientBoxBounds);
 
+
   // Post-process the color stops to calculate the missing positions.
   // When a position is missing, it's typically between the previous and next.
-  // But there are edge cases. The gradient line extends infinitely in either
-  // directions, and so if the first position is missing but the second is -50
-  // then first is also -50.
+  // But there are edge cases.
 
-  // Given a stop index, get the position of the next stop. If there is no next
-  // stop, return either 100 (for 100%) or the provided last position if it is
-  // more than 100.
-  let nextPos = (i, lastPos) => {
-    if (parts[i+1]) {
-      // If there's a next stop, get its position, or go to the next one if it
-      // doesn't have one.
-      let pos = resolvePosition(parts[i+1].position, gradientLine);
-      return pos ? {nextIndex: i+1, next: pos} : nextPos(i+1, lastPos);
-    } else {
-      // Otherwise, this is the last stop.
-      return {nextIndex: i, next: Math.max(lastPos||0, 100)};
-    }
-  }
-
-  // The last defined position we found.
-  let lastPos;
+  // Massage the color stop positions so they're all defined.
+  let positions = parts.map(({position}) => resolvePosition(position, gradientLine));
+  normalizeStops(positions);
 
   let stops = [];
-  for (let i = 0; i < parts.length; i++) {
-    let stop = parts[i];
-    let position;
-
-    // If a position is already defined, use this one, except if there was
-    // previous, greater, position.
-    if (stop.position !== "") {
-      position = resolvePosition(stop.position, gradientLine);
-      if (typeof lastPos !== "undefined" && lastPos >= position) {
-        position = lastPos;
-      }
-    }
-
-    // Otherwise, distribute the value according to the number of stops until
-    // the next defined value.
-    else {
-      let {nextIndex, next} = nextPos(i, lastPos);
-
-      // If this is the first stop and the next is greater than 0, then this is
-      // 0.
-      if (i === 0 && next > 0) {
-        position = 0;
-      }
-
-      // If this is the first stop and the next is lower than 0, then clamp it
-      // to the next value.
-      if (i === 0 && next <= 0) {
-        position = next;
-      }
-
-      // If this is the last stop and the previous is lower than 100, then this
-      // is 100.
-      else if (i === parts.length - 1 && lastPos < 100) {
-        position = 100;
-      }
-
-      // If this is the last stop and the previous was greater than 100, then
-      // clamp it to the previous value.
-      else if (i === parts.length - 1 && lastPos >= 100) {
-        position = lastPos;
-      }
-
-      else {
-        if (typeof lastPos === "undefined") {
-          position = Math.min(0, next);
-        } else {
-          position = lastPos + ((next - lastPos) / (nextIndex - i + 1));
-        }
-      }
-    }
-
+  for (let i = 0; i < positions.length; i++) {
     stops.push({
-      color: stop.color,
-      position: position
+      color: parts[i].color,
+      position: positions[i]
     });
-
-    lastPos = position;
   }
 
   return {angle, stops, gradientLine};
