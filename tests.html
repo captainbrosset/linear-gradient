@@ -16,7 +16,7 @@ function reportErrorSummary() {
     console.log("No errors!")
   }
   for (let error of ERRORS) {
-    console.error(msg);
+    console.error(error);
   }
 }
 
@@ -100,11 +100,6 @@ console.log("-------------------------------");
 console.log("TESTING normalizeStops");
 console.log("-------------------------------");
 
-// Each test case is an object with the following properties:
-// - input: An array of color stop positions. Each position must either be
-//   undefined, or a number, in which case it will be assumed to be in %
-// - output: An array of color stop positions we expect the browser to have
-//   understood from the input.
 const STOPS_TEST_DATA = [{
   input: [undefined, undefined],
   output: [0, 100]
@@ -153,6 +148,12 @@ const STOPS_TEST_DATA = [{
 }, {
   input: [-5, 40, 65, undefined],
   output: [-5, 40, 65, 100]
+}, {
+  input: [100, 50, 25, 0],
+  output: [100, 100, 100, 100]
+}, {
+  input: [undefined, 50, undefined, 10, undefined, -50, undefined, 3000],
+  output: [0, 50, 50, 50, 50, 50, 1525, 3000]
 }];
 
 for (let {input, output} of STOPS_TEST_DATA) {
