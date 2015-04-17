@@ -25,7 +25,7 @@ const ANGLE_KEYWORDS = {
   "to left": () => 3*Math.PI/2,
   "to top left": bounds => (2*Math.PI) - ANGLE_KEYWORDS["to top right"](bounds)
 };
-const ANGLE_REGEX = /^-?[0-9.]+deg$/;
+const ANGLE_REGEX = /^-?[0-9.]+(deg|rad|grad|turn)$/;
 const COLOR_REGEX = /^\([0-9., ]+\)/;
 const ARC_RADIUS = 50;
 
@@ -180,9 +180,21 @@ function parseGradientPart(part, gradientBoxBounds) {
       angle: ANGLE_KEYWORDS[part](gradientBoxBounds)
     };
   } else if (part.match(ANGLE_REGEX)) {
+    let parts = part.match(ANGLE_REGEX);
+    let value = parseFloat(parts[0]);
+    let unit = parts[1];
+
+    if (unit === "rad") {
+      value *= 180 / Math.PI;
+    } else if (unit === "grad") {
+      value *= 360 / 400;
+    } else if (unit === "turn") {
+      value *= 360;
+    }
+
     return {
       type: "angle",
-      angle: parseFloat(part) * Math.PI / 180
+      angle: value * Math.PI / 180
     };
   } else {
     // Otherwise, it's a color stop. Color stops may or may not have a position.
@@ -292,7 +304,6 @@ function parseGradient(parsedBackgroundImage, gradientBoxBounds) {
 
   // Get the gradient line data.
   let gradientLine = getGradientLine(angle, gradientBoxBounds);
-
 
   // Post-process the color stops to calculate the missing positions.
   // When a position is missing, it's typically between the previous and next.
