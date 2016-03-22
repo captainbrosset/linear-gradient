@@ -1,18 +1,4 @@
-/*
-      B
-    +-----+
-    |    /
-    |   /
-  A |  /  C
-    | /
-    |/
 
-     C2 = A2 + B2
-     A = cos(AC) * C
-     AC = acos(A/C)
-*/
-
-const SVG_NS = "http://www.w3.org/2000/svg";
 const ANGLE_KEYWORDS = {
   "to top": () => 0,
   "to top right": ({width, height}) => {
@@ -30,52 +16,60 @@ const COLOR_REGEX = /^\([0-9., ]+\)/;
 const ARC_RADIUS = 50;
 
 let testElement = document.querySelector(".test-element");
-
-let svg = document.querySelector(".gradient-overlay");
-let box = document.querySelector(".gradient-box");
-let line = document.querySelector(".gradient-line");
-let angleArc = document.querySelector(".angle-arc");
-let centerLine = document.querySelector(".angle-0-line");
-let startEdge = document.querySelector(".start-edge");
-let endEdge = document.querySelector(".end-edge");
-let startPoint = document.querySelector(".start-point");
-let centerPoint = document.querySelector(".center-point");
-let endPoint = document.querySelector(".end-point");
+let canvas = document.querySelector(".gradient-overlay");
+let ctx = canvas.getContext("2d");
 
 let input = document.querySelector(".gradient-input");
 input.value = document.styleSheets[0].cssRules[4]
               .style.getPropertyValue("background-image");
 
-function deleteStops() {
-  let stops = document.querySelectorAll(".color-stop, .color-stop-label");
-  [].slice.apply(stops).forEach(stop => {
-    stop.remove();
-  });
-}
+function drawColorStop(color, position, angle, index) {
+  // Drawing the stop cirlce.
+  ctx.save();
+  ctx.fillStyle = "#555";
 
-function renderStop(color, position, angle, index) {
-  let stop = document.createElementNS(SVG_NS, "circle");
-  stop.classList.add("color-stop");
-  stop.setAttribute("r", 4);
-  stop.setAttribute("cx", position.x);
-  stop.setAttribute("cy", position.y);
-  svg.appendChild(stop);
+  ctx.beginPath();
+  ctx.arc(position.x, position.y, 4, 0, 2 * Math.PI, false);
+  ctx.fill();
 
-  let label = document.createElement("div");
-  label.classList.add("color-stop-label");
-  label.style.background = color;
-  label.style.top = position.y + "px";
-  label.style.left = position.x + "px";
-  document.body.appendChild(label);
+  ctx.restore();
 
-  angle = angle * 180 / Math.PI;
-  if (index % 2 === 0) {
-    angle -= 90;
-  } else {
-    angle += 90;
-  }
-  label.style.webkitTransform = "translateX(-10px) translateY(10px) rotate(" + angle + "deg)";
-  label.style.transform = "translateX(-10px) translateY(10px) rotate(" + angle + "deg)";
+  // Draw the color label.
+  let cornerRadius = 4;
+  let size = 20;
+  let padding = 15;
+
+  ctx.save();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "white";
+  ctx.fillStyle = color;
+  ctx.shadowColor = "rgba(0, 0, 0, .3)";
+  ctx.shadowBlur = 5;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 1;
+  ctx.translate(position.x, position.y);
+  ctx.rotate(index % 2 ? angle + Math.PI/2 : angle - Math.PI/2);
+  ctx.translate(-size/2, - size - padding);
+
+  ctx.beginPath();
+  ctx.moveTo(cornerRadius, 0);
+  ctx.lineTo(size - cornerRadius, 0);
+  ctx.arcTo(size, 0, size, cornerRadius, cornerRadius);
+  ctx.lineTo(size, size - cornerRadius);
+  ctx.arcTo(size, size, size - cornerRadius, size, cornerRadius);
+  
+  ctx.lineTo((size / 2) + cornerRadius, size);
+  ctx.lineTo((size / 2), size + 5);
+  ctx.lineTo((size / 2) - cornerRadius, size);
+
+  ctx.lineTo(cornerRadius, size);
+  ctx.arcTo(0, size, 0, size - cornerRadius, cornerRadius);
+  ctx.lineTo(0, cornerRadius);
+  ctx.arcTo(0, 0, cornerRadius, 0, cornerRadius);
+  ctx.stroke();
+  ctx.fill();
+
+  ctx.restore();
 }
 
 function getColorStopPosition(angle, gradientLine, percentagePosition) {
@@ -89,54 +83,70 @@ function getColorStopPosition(angle, gradientLine, percentagePosition) {
   };
 }
 
-function renderGradientLine(quad, {angle, stops, gradientLine}) {
-  deleteStops();
+function drawGradientBox(quad) {
+  ctx.save();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#555";
 
-  // Display the gradient box
-  box.setAttribute("x", quad.p1.x);
-  box.setAttribute("y", quad.p1.y);
-  box.setAttribute("width", quad.bounds.width);
-  box.setAttribute("height", quad.bounds.height);
+  ctx.beginPath();
+  ctx.rect(quad.p1.x, quad.p1.y, quad.bounds.width, quad.bounds.height);
+  ctx.stroke();
 
-  // Display the gradient line
-  line.setAttribute("x1", gradientLine.start.x);
-  line.setAttribute("y1", gradientLine.start.y);
-  line.setAttribute("x2", gradientLine.end.x);
-  line.setAttribute("y2", gradientLine.end.y);
+  ctx.restore();
+}
 
-  // Display the start point
-  startPoint.setAttribute("cx", gradientLine.start.x);
-  startPoint.setAttribute("cy", gradientLine.start.y);
+function drawGradientLine(gradientLine) {
+  ctx.save();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#555";
+  
+  ctx.beginPath();
+  ctx.moveTo(gradientLine.start.x, gradientLine.start.y);
+  ctx.lineTo(gradientLine.end.x, gradientLine.end.y);
+  ctx.stroke();
+  
+  ctx.restore();
+}
 
-  // Display the center point
-  centerPoint.setAttribute("cx", gradientLine.center.x);
-  centerPoint.setAttribute("cy", gradientLine.center.y);
+function drawLinePoint(center) {
+  ctx.save();
+  ctx.fillStyle = "#555";
 
-  // Display the end point
-  endPoint.setAttribute("cx", gradientLine.end.x);
-  endPoint.setAttribute("cy", gradientLine.end.y);
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, 2, 0, 2 * Math.PI, false);
+  ctx.fill();
 
-  // Display the center line
-  centerLine.setAttribute("x1", gradientLine.center.x);
-  centerLine.setAttribute("y1", gradientLine.center.y);
-  centerLine.setAttribute("x2", gradientLine.center.x);
-  centerLine.setAttribute("y2", gradientLine.center.y - ARC_RADIUS - 10);
+  ctx.restore();
+}
 
-  // Display the angle arc
-  angle = angle % (Math.PI*2);
-  if (angle < 0) {
-    angle = (Math.PI*2) + angle;
-  }
+function drawCenterLine(gradientLine) {
+  ctx.save();
+  ctx.strokeStyle = "#555";
+  ctx.setLineDash([3, 2]);
 
-  let arcX = gradientLine.center.x + Math.cos(angle-Math.PI/2) * ARC_RADIUS;
-  let arcY = gradientLine.center.y + Math.sin(angle-Math.PI/2) * ARC_RADIUS;
-  let largeArc = angle > Math.PI ? 1 : 0;
-  let path = ["M", gradientLine.center.x, ",", gradientLine.center.y, " ",
-              "m", "0,-", ARC_RADIUS, " ",
-              "A", ARC_RADIUS, ",", ARC_RADIUS, " 0 ", largeArc, " 1 ", arcX, ",", arcY];
-  angleArc.setAttribute("d", path.join(""));
+  ctx.beginPath();
+  ctx.moveTo(gradientLine.center.x, gradientLine.center.y);
+  ctx.lineTo(gradientLine.center.x, gradientLine.center.y - ARC_RADIUS - 10);
+  ctx.stroke();
+  
+  ctx.restore();
+}
 
-  // Display the two perpendicular lines
+function drawAngleArc(angle, gradientLine) {
+  let startAngle = 3 * Math.PI / 2;
+  let endAngle = angle - Math.PI / 2;
+
+  ctx.save();
+  ctx.strokeStyle = "#555";
+
+  ctx.beginPath();
+  ctx.arc(gradientLine.center.x, gradientLine.center.y, ARC_RADIUS, startAngle, endAngle);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawPerpendicularLines(angle, quad, gradientLine) {
   let point1, point2;
   if (angle <= Math.PI/2) {
     point1 = quad.p4;
@@ -152,19 +162,53 @@ function renderGradientLine(quad, {angle, stops, gradientLine}) {
     point2 = quad.p1;
   }
 
-  startEdge.setAttribute("x1", gradientLine.start.x);
-  startEdge.setAttribute("y1", gradientLine.start.y);
-  startEdge.setAttribute("x2", point1.x);
-  startEdge.setAttribute("y2", point1.y);
-  endEdge.setAttribute("x1", gradientLine.end.x);
-  endEdge.setAttribute("y1", gradientLine.end.y);
-  endEdge.setAttribute("x2", point2.x);
-  endEdge.setAttribute("y2", point2.y);
+  ctx.save();
+  ctx.strokeStyle = "#555";
+  ctx.setLineDash([3, 2]);
+
+  ctx.beginPath();
+  ctx.moveTo(gradientLine.start.x, gradientLine.start.y);
+  ctx.lineTo(point1.x, point1.y);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(gradientLine.end.x, gradientLine.end.y);
+  ctx.lineTo(point2.x, point2.y);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function renderGradientLine(quad, {angle, stops, gradientLine}) {
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(0.5, 0.5);
+
+  // TODO: THIS SHOULD ACTUALLY BE DRAWN AROUND THE AREA DESCRIBED BY
+  // BACKGROUND-SIZE, NOT THE ENTIRE ELEMENT'S QUADS
+  drawGradientBox(quad);
+  
+  drawGradientLine(gradientLine);
+
+  drawLinePoint(gradientLine.start);
+  drawLinePoint(gradientLine.center);
+  drawLinePoint(gradientLine.end);
+
+  drawCenterLine(gradientLine);
+
+  drawAngleArc(angle, gradientLine);
+
+  drawPerpendicularLines(angle, quad, gradientLine);
 
   for (let i = 0; i < stops.length; i ++) {
     let {color, position} = stops[i];
-    renderStop(color, getColorStopPosition(angle, gradientLine, position), angle, i);
+    drawColorStop(color, getColorStopPosition(angle, gradientLine, position), angle, i);
   }
+
+  ctx.restore();
 }
 
 function parseGradientPart(part, gradientBoxBounds) {
@@ -354,6 +398,9 @@ function parseBackgroundImage(backgroundImage) {
  * @return {Array} An array of tokens: {type, value, startIndex, endIndex}
  */
 function tokenizeBackgroundImage(backgroundImage) {
+  // TODO: USE CSSLEXER INSTEAD
+  // TODO: DEAL WITH MULTIPLE BACKGROUND IMAGES
+
   // A CSS <image> may be a <uri>, a <gradient>, or a part of the page, defined by
   // the element() function.
   // "linear-gradient(50deg, rgba(0, 0, 0, 0.6), transparent), repeating-linear-gradient(to right, transparent 0px, transparent 100px, rgb(0, 0, 0) 100px, rgb(0, 0, 0) 200px, transparent 200px), -moz-element(#angle-range), url("https://dl.dropboxusercontent.com/u/714210/grid.png")"
@@ -463,44 +510,12 @@ function tokenizeBackgroundImage(backgroundImage) {
   return tokens;
 }
 
-function getBoxQuad(element) {
-  let quad;
-  if (element.getBoxQuads) {
-    return element.getBoxQuads()[0];
-  } else {
-    return {
-      p1: {
-        x: element.offsetLeft,
-        y: element.offsetTop
-      },
-      p2: {
-        x: element.offsetLeft + element.offsetWidth,
-        y: element.offsetTop
-      },
-      p3: {
-        x: element.offsetLeft + element.offsetWidth,
-        y: element.offsetTop + element.offsetHeight
-      },
-      p4: {
-        x: element.offsetLeft,
-        y: element.offsetTop + element.offsetHeight
-      },
-      bounds: {
-        x: element.offsetLeft,
-        y: element.offsetTop,
-        width: element.offsetWidth,
-        height: element.offsetHeight
-      }
-    };
-  }
-}
-
 function previewGradient(element, index) {
   let backgroundImages = getComputedStyle(element).backgroundImage;
   let parsedImages = parseBackgroundImage(backgroundImages);
   let gradient = parsedImages[index];
 
-  let quad = getBoxQuad(element);
+  let quad = element.getBoxQuads()[0];
 
   renderGradientLine(quad, parseGradient(gradient, quad.bounds));
 }

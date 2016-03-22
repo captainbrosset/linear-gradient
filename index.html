@@ -10,27 +10,7 @@
 <input type="text" class="gradient-input" />
 <div class="test-element"></div>
 
-<svg class="gradient-overlay" width="100%" height="100%">
-  <defs>
-    <marker id="extending-line-end" markerWidth="50" markerHeight="1"
-            orient="auto" markerUnits="userSpaceOnUse" refX="0" refY="0">
-      <line class="support-line" x1="0" y1="0" x2="50" y2="0" />
-    </marker>
-    <marker id="extending-line-start" markerWidth="50" markerHeight="1"
-            orient="auto" markerUnits="userSpaceOnUse" refX="50" refY="0">
-      <line class="support-line" x1="0" y1="0" x2="50" y2="0" />
-    </marker>
-  </defs>
-  <rect class="gradient-box" />
-  <line class="gradient-line extend-line" />
-  <line class="angle-0-line support-line" />
-  <line class="start-edge support-line extend-line" />
-  <line class="end-edge support-line extend-line" />
-  <circle class="start-point gradient-line-point" r="2" />
-  <circle class="center-point gradient-line-point" r="2" />
-  <circle class="end-point gradient-line-point" r="2" />
-  <path class="angle-arc" />
-</svg>
+<canvas class="gradient-overlay" width="100%" height="100%"></canvas>
 
 <script type="application/javascript;version=1.8" src="normalizer.js"></script>
 <script type="application/javascript;version=1.8" src="app.js"></script>
