@@ -35,12 +35,12 @@ function drawColorStop(color, position, angle, index) {
   ctx.restore();
 
   // Draw the color label.
-  let cornerRadius = 4;
-  let size = 20;
+  let cornerRadius = 3;
+  let size = 15;
   let padding = 15;
 
   ctx.save();
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;
   ctx.strokeStyle = "white";
   ctx.fillStyle = color;
   ctx.shadowColor = "rgba(0, 0, 0, .3)";
@@ -48,7 +48,7 @@ function drawColorStop(color, position, angle, index) {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 1;
   ctx.translate(position.x, position.y);
-  ctx.rotate(index % 2 ? angle + Math.PI/2 : angle - Math.PI/2);
+  ctx.rotate(index % 2 === 0 ? angle + Math.PI/2 : angle - Math.PI/2);
   ctx.translate(-size/2, - size - padding);
 
   ctx.beginPath();
@@ -59,7 +59,7 @@ function drawColorStop(color, position, angle, index) {
   ctx.arcTo(size, size, size - cornerRadius, size, cornerRadius);
   
   ctx.lineTo((size / 2) + cornerRadius, size);
-  ctx.lineTo((size / 2), size + 5);
+  ctx.lineTo((size / 2), size + cornerRadius);
   ctx.lineTo((size / 2) - cornerRadius, size);
 
   ctx.lineTo(cornerRadius, size);
@@ -180,12 +180,14 @@ function drawPerpendicularLines(angle, quad, gradientLine) {
 }
 
 function renderGradientLine(quad, {angle, stops, gradientLine}) {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.save();
-  ctx.translate(0.5, 0.5);
 
   // TODO: THIS SHOULD ACTUALLY BE DRAWN AROUND THE AREA DESCRIBED BY
   // BACKGROUND-SIZE, NOT THE ENTIRE ELEMENT'S QUADS
@@ -207,8 +209,6 @@ function renderGradientLine(quad, {angle, stops, gradientLine}) {
     let {color, position} = stops[i];
     drawColorStop(color, getColorStopPosition(angle, gradientLine, position), angle, i);
   }
-
-  ctx.restore();
 }
 
 function parseGradientPart(part, gradientBoxBounds) {
